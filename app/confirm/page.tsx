@@ -5,18 +5,31 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 const fraunces = 'var(--font-fraunces), Fraunces, serif';
 
+<<<<<<< HEAD
+=======
+const RATE = 16.856;
+
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
 function ConfirmContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const gbp = searchParams.get('gbp') ?? '100.00';
   const ghs = searchParams.get('ghs') ?? '1659.87';
+<<<<<<< HEAD
   const rate = searchParams.get('rate') ?? '16.856';
+=======
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
   const name = searchParams.get('name') ?? 'Recipient';
   const phone = searchParams.get('phone') ?? '';
   const network = searchParams.get('network') ?? 'MTN';
 
+<<<<<<< HEAD
   const displayRate = parseFloat(rate).toFixed(3);
+=======
+  const gbpNum = parseFloat(gbp);
+  const feeGbp = (gbpNum * 0.015).toFixed(2);
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
 
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +37,11 @@ function ConfirmContent() {
     setLoading(true);
     // Simulate payment processing — will wire to real API in Phase 3
     setTimeout(() => {
+<<<<<<< HEAD
       const params = new URLSearchParams({ gbp, ghs, rate, name, phone, network });
+=======
+      const params = new URLSearchParams({ gbp, ghs, name, phone, network });
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
       router.push(`/success?${params.toString()}`);
     }, 1500);
   }
@@ -75,11 +92,19 @@ function ConfirmContent() {
             <div className="space-y-2.5 text-sm">
               <div className="flex justify-between">
                 <span className="text-[#8a9e8c]">Exchange rate</span>
+<<<<<<< HEAD
                 <span className="text-[#f0ede6]">1 GBP = {displayRate} GHS</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-[#8a9e8c]">Fees</span>
                 <span className="text-[#2ecc71] font-medium">None</span>
+=======
+                <span className="text-[#f0ede6]">1 GBP = {RATE} GHS</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#8a9e8c]">Fee (1.5%)</span>
+                <span className="text-[#f0ede6]">£{feeGbp}</span>
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
               </div>
               <div className="flex justify-between">
                 <span className="text-[#8a9e8c]">Delivery</span>

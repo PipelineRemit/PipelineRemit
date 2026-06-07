@@ -1,14 +1,23 @@
 'use client';
 
+<<<<<<< HEAD
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 const fraunces = 'var(--font-fraunces), Fraunces, serif';
 const FALLBACK_RATE = 16.856;
+=======
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+const RATE = 16.856;
+const FEE_PERCENT = 0.015;
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
 
 export default function Home() {
   const router = useRouter();
   const [gbpInput, setGbpInput] = useState('100');
+<<<<<<< HEAD
   const [rate, setRate] = useState<number | null>(null);
   const [rateLoading, setRateLoading] = useState(true);
   const [isFallback, setIsFallback] = useState(false);
@@ -39,6 +48,15 @@ export default function Home() {
     router.push(
       `/recipient?gbp=${gbp.toFixed(2)}&ghs=${ghsAmount.toFixed(2)}&rate=${currentRate.toFixed(5)}`
     );
+=======
+
+  const gbp = parseFloat(gbpInput) || 0;
+  const feeGbp = gbp * FEE_PERCENT;
+  const ghsAmount = (gbp - feeGbp) * RATE;
+
+  function handleContinue() {
+    router.push(`/recipient?gbp=${gbp.toFixed(2)}&ghs=${ghsAmount.toFixed(2)}`);
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
   }
 
   return (
@@ -49,7 +67,11 @@ export default function Home() {
         <nav className="flex items-center justify-between px-4 pt-12 pb-4">
           <span
             className="text-[#f0b429] font-bold text-xl tracking-tight"
+<<<<<<< HEAD
             style={{ fontFamily: fraunces }}
+=======
+            style={{ fontFamily: 'var(--font-fraunces), Fraunces, serif' }}
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
           >
             PipelineRemit
           </span>
@@ -68,7 +90,11 @@ export default function Home() {
           <div className="mt-2 mb-6">
             <h1
               className="text-[32px] font-semibold leading-tight"
+<<<<<<< HEAD
               style={{ fontFamily: fraunces }}
+=======
+              style={{ fontFamily: 'var(--font-fraunces), Fraunces, serif' }}
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
             >
               Send Money Home.<br />
               <span className="text-[#f0b429]">Instantly.</span>
@@ -89,7 +115,11 @@ export default function Home() {
               <div className="flex items-center bg-[#1f3222] border border-[#2a3d2c] rounded-[10px] px-3 py-3 mt-2 focus-within:border-[#f0b429] transition-colors">
                 <span
                   className="text-[#f0ede6] text-2xl font-semibold mr-1 leading-none"
+<<<<<<< HEAD
                   style={{ fontFamily: fraunces }}
+=======
+                  style={{ fontFamily: 'var(--font-fraunces), Fraunces, serif' }}
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
                 >
                   £
                 </span>
@@ -99,7 +129,11 @@ export default function Home() {
                   value={gbpInput}
                   onChange={(e) => setGbpInput(e.target.value)}
                   className="flex-1 bg-transparent text-[#f0ede6] text-2xl font-semibold outline-none w-0 min-w-0"
+<<<<<<< HEAD
                   style={{ fontFamily: fraunces }}
+=======
+                  style={{ fontFamily: 'var(--font-fraunces), Fraunces, serif' }}
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
                   aria-label="GBP amount"
                 />
                 <span className="text-[#8a9e8c] text-sm font-medium ml-2 shrink-0">GBP</span>
@@ -111,6 +145,7 @@ export default function Home() {
               <div className="flex-1 h-px bg-[#2a3d2c]" />
               <div className="flex items-center gap-1 text-xs text-[#8a9e8c]">
                 <i className="ti ti-arrows-down-up text-[#f0b429] text-xs" />
+<<<<<<< HEAD
                 {rateLoading ? (
                   <div className="h-3 w-36 bg-[#2a3d2c] rounded animate-pulse" />
                 ) : (
@@ -124,6 +159,11 @@ export default function Home() {
                     )}
                   </span>
                 )}
+=======
+                <span>
+                  1 GBP = <span className="text-[#f0b429] font-medium">16.856 GHS</span>
+                </span>
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
               </div>
               <div className="flex-1 h-px bg-[#2a3d2c]" />
             </div>
@@ -136,6 +176,7 @@ export default function Home() {
               <div className="flex items-center bg-[#1f3222] border border-[#2a3d2c] rounded-[10px] px-3 py-3 mt-2">
                 <span
                   className="text-[#f0ede6] text-2xl font-semibold mr-1 leading-none"
+<<<<<<< HEAD
                   style={{ fontFamily: fraunces }}
                 >
                   ₵
@@ -150,15 +191,35 @@ export default function Home() {
                     {ghsAmount > 0 ? ghsAmount.toFixed(2) : '0.00'}
                   </span>
                 )}
+=======
+                  style={{ fontFamily: 'var(--font-fraunces), Fraunces, serif' }}
+                >
+                  ₵
+                </span>
+                <span
+                  className="flex-1 text-[#f0b429] text-2xl font-semibold"
+                  style={{ fontFamily: 'var(--font-fraunces), Fraunces, serif' }}
+                >
+                  {ghsAmount > 0 ? ghsAmount.toFixed(2) : '0.00'}
+                </span>
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
                 <span className="text-[#8a9e8c] text-sm font-medium ml-2 shrink-0">GHS</span>
               </div>
             </div>
 
+<<<<<<< HEAD
             {/* Info rows */}
             <div className="space-y-2 mb-4 text-sm">
               <div className="flex justify-between items-center">
                 <span className="text-[#8a9e8c]">Fees</span>
                 <span className="text-[#2ecc71] font-medium">None</span>
+=======
+            {/* Fee & Delivery */}
+            <div className="space-y-2 mb-4 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-[#8a9e8c]">Fee (1.5%)</span>
+                <span className="text-[#f0ede6]">£{feeGbp > 0 ? feeGbp.toFixed(2) : '0.00'}</span>
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-[#8a9e8c]">Delivery</span>
@@ -172,6 +233,7 @@ export default function Home() {
             {/* Continue Button */}
             <button
               onClick={handleContinue}
+<<<<<<< HEAD
               disabled={rateLoading}
               className="w-full bg-[#f0b429] text-[#0f1a14] font-semibold text-[15px] rounded-[10px] py-[14px] hover:bg-[#d99e1e] active:bg-[#d99e1e] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
@@ -181,13 +243,23 @@ export default function Home() {
             <p className="text-center text-[#8a9e8c] text-[11px] mt-3">
               No fees · Live rate updated hourly
             </p>
+=======
+              className="w-full bg-[#f0b429] text-[#0f1a14] font-semibold text-[15px] rounded-[10px] py-[14px] hover:bg-[#d99e1e] active:bg-[#d99e1e] transition-colors"
+            >
+              Continue
+            </button>
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
           </div>
 
           {/* How it Works */}
           <div className="mb-6">
             <h2
               className="text-lg font-semibold mb-4 text-[#f0ede6]"
+<<<<<<< HEAD
               style={{ fontFamily: fraunces }}
+=======
+              style={{ fontFamily: 'var(--font-fraunces), Fraunces, serif' }}
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
             >
               How it Works
             </h2>
@@ -201,7 +273,11 @@ export default function Home() {
                 {
                   step: '2',
                   title: 'Add recipient',
+<<<<<<< HEAD
                   desc: 'Enter their name and MTN or Telecel mobile money number.',
+=======
+                  desc: "Enter their name and MTN or Telecel mobile money number.",
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
                 },
                 {
                   step: '3',
@@ -213,7 +289,11 @@ export default function Home() {
                   <div className="w-8 h-8 rounded-full bg-[#f0b429] flex items-center justify-center shrink-0 mt-0.5">
                     <span
                       className="text-[#0f1a14] font-bold text-sm"
+<<<<<<< HEAD
                       style={{ fontFamily: fraunces }}
+=======
+                      style={{ fontFamily: 'var(--font-fraunces), Fraunces, serif' }}
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
                     >
                       {step}
                     </span>
@@ -238,7 +318,11 @@ export default function Home() {
                 <div key={label} className="flex flex-col items-center px-2 py-1">
                   <span
                     className="text-[#f0b429] text-xl font-semibold"
+<<<<<<< HEAD
                     style={{ fontFamily: fraunces }}
+=======
+                    style={{ fontFamily: 'var(--font-fraunces), Fraunces, serif' }}
+>>>>>>> f70e589a010b5566040de8c0f588d12741125619
                   >
                     {stat}
                   </span>
