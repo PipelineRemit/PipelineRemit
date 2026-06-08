@@ -11,10 +11,7 @@ function RecipientContent() {
 
   const gbp = searchParams.get('gbp') ?? '100.00';
   const ghs = searchParams.get('ghs') ?? '1659.87';
-<<<<<<< HEAD
   const rate = searchParams.get('rate') ?? '16.856';
-=======
->>>>>>> f70e589a010b5566040de8c0f588d12741125619
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -34,10 +31,7 @@ function RecipientContent() {
     const params = new URLSearchParams({
       gbp,
       ghs,
-<<<<<<< HEAD
       rate,
-=======
->>>>>>> f70e589a010b5566040de8c0f588d12741125619
       name: name.trim(),
       phone: phone.trim(),
       network,
