@@ -20,7 +20,7 @@
  * never sent to the browser.
  */
 
-const SPREAD_FACTOR = 0.978; // 2.2% spread (1 - 0.022)
+const SPREAD_FACTOR = 0.95; // 5% spread (1 - 0.05)
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes in milliseconds
 const FALLBACK_RATE = 16.856; // used only when the API is unreachable
 
