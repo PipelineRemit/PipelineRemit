@@ -1,23 +1,16 @@
 import type { Metadata } from "next";
-import { Fraunces, DM_Sans } from "next/font/google";
+import { Figtree } from "next/font/google";
 import "./globals.css";
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+const figtree = Figtree({
+  variable: "--font-figtree",
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  style: ["normal", "italic"],
-});
-
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
-  title: "PipelineRemit",
-  description: "Send money home. Instantly. GBP to GHS in under 30 minutes.",
+  title: "PipelineRemit — Send money home with ease",
+  description: "Send GBP from the UK directly to MTN or Telecel mobile money wallets in Ghana. In under 30 minutes.",
 };
 
 export default function RootLayout({
@@ -26,20 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${fraunces.variable} ${dmSans.variable} h-full`}
-    >
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
-        />
-      </head>
-      <body
-        className="min-h-full flex flex-col"
-        style={{ fontFamily: 'var(--font-dm-sans), "DM Sans", sans-serif' }}
-      >
+    <html lang="en" className={figtree.variable}>
+      <body style={{ fontFamily: 'var(--font-figtree), "Figtree", sans-serif', margin: 0, padding: 0 }}>
         {children}
       </body>
     </html>

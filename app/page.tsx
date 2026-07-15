@@ -1,279 +1,392 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
-const fraunces = 'var(--font-fraunces), Fraunces, serif';
-const FALLBACK_RATE = 16.856;
+// ── Design tokens ────────────────────────────────────────────────────────────
+const C = {
+  bg:            '#f7f2ea',
+  card:          '#ffffff',
+  divider:       '#f0e8dc',
+  primary:       '#c4651a',
+  primaryTint:   '#fdece0',
+  primaryDark:   '#b35c1c',
+  textPrimary:   '#33261b',
+  textSecondary: '#8a7a68',
+  textLabel:     '#a8998a',
+  success:       '#4b9b73',
+  successText:   '#388a5f',
+  successTint:   '#e6f4ec',
+  error:         '#c0392b',
+  errorTint:     '#fbe9e7',
+};
 
-export default function Home() {
-  const router = useRouter();
-  const [gbpInput, setGbpInput] = useState('100');
-  const [rate, setRate] = useState<number | null>(null);
-  const [rateLoading, setRateLoading] = useState(true);
-  const [isFallback, setIsFallback] = useState(false);
+// ── Sub-components ───────────────────────────────────────────────────────────
 
-  useEffect(() => {
-    async function fetchRate() {
-      try {
-        const res = await fetch('/api/rates');
-        if (!res.ok) throw new Error('Rate fetch failed');
-        const data: { rate: number; fetchedAt: number; isFallback: boolean } = await res.json();
-        setRate(data.rate);
-        setIsFallback(data.isFallback);
-      } catch {
-        setRate(FALLBACK_RATE);
-        setIsFallback(true);
-      } finally {
-        setRateLoading(false);
-      }
+function Nav() {
+  return (
+    <nav style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '20px 24px',
+      maxWidth: 1080,
+      margin: '0 auto',
+      width: '100%',
+    }}>
+      <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5 }}>
+        <span style={{ color: C.textPrimary }}>Pipeline</span>
+        <span style={{ color: C.primary }}>Remit</span>
+      </span>
+      <span style={{
+        fontSize: 13,
+        fontWeight: 700,
+        color: C.primary,
+        background: C.primaryTint,
+        borderRadius: 999,
+        padding: '6px 14px',
+        border: `1px solid ${C.divider}`,
+      }}>
+        Coming soon
+      </span>
+    </nav>
+  );
+}
+
+function WaitlistForm() {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setStatus('loading');
+    try {
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      if (!res.ok) throw new Error('Failed');
+      setStatus('success');
+    } catch {
+      setStatus('error');
     }
-    fetchRate();
-  }, []);
+  }
 
-  const gbp = parseFloat(gbpInput) || 0;
-  const currentRate = rate ?? FALLBACK_RATE;
-  const ghsAmount = gbp * currentRate;
-
-  function handleContinue() {
-    router.push(
-      `/recipient?gbp=${gbp.toFixed(2)}&ghs=${ghsAmount.toFixed(2)}&rate=${currentRate.toFixed(5)}`
+  if (status === 'success') {
+    return (
+      <p style={{ fontSize: 15, fontWeight: 600, color: C.successText, marginTop: 8 }}>
+        ✓ You&apos;re on the list! We&apos;ll be in touch soon.
+      </p>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0f1a14] text-[#f0ede6] flex justify-center">
-      <div className="w-full max-w-[390px] flex flex-col min-h-screen relative">
+    <form onSubmit={handleSubmit} style={{ marginTop: 8 }}>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <input
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder="your@email.com"
+          required
+          style={{
+            flex: '1 1 220px',
+            padding: '14px 18px',
+            borderRadius: 999,
+            border: `1.5px solid ${C.divider}`,
+            background: C.card,
+            fontSize: 15,
+            color: C.textPrimary,
+            outline: 'none',
+            fontFamily: 'inherit',
+          }}
+        />
+        <button
+          type="submit"
+          disabled={status === 'loading'}
+          style={{
+            padding: '14px 28px',
+            borderRadius: 999,
+            background: status === 'loading' ? C.primaryDark : C.primary,
+            color: '#fff',
+            fontSize: 15,
+            fontWeight: 700,
+            border: 'none',
+            cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+            whiteSpace: 'nowrap',
+            fontFamily: 'inherit',
+            boxShadow: `0 8px 24px rgba(196,101,26,0.35)`,
+          }}
+        >
+          {status === 'loading' ? 'Joining…' : 'Join the waitlist →'}
+        </button>
+      </div>
+      {status === 'error' && (
+        <p style={{ fontSize: 13, color: C.error, marginTop: 8, fontWeight: 500 }}>
+          Something went wrong. Please try again.
+        </p>
+      )}
+    </form>
+  );
+}
 
-        {/* Top Nav */}
-        <nav className="flex items-center justify-between px-4 pt-12 pb-4">
-          <span
-            className="text-[#f0b429] font-bold text-xl tracking-tight"
-            style={{ fontFamily: fraunces }}
-          >
-            PipelineRemit
-          </span>
-          <button
-            className="w-9 h-9 rounded-full bg-[#1a2a1c] border border-[#2a3d2c] flex items-center justify-center"
-            aria-label="Profile"
-          >
-            <i className="ti ti-user text-[#8a9e8c] text-base" />
-          </button>
-        </nav>
+function PhoneMockup() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', padding: '16px 0 8px' }}>
+      {/* Phone frame */}
+      <div style={{
+        width: 300,
+        height: 620,
+        borderRadius: 48,
+        background: '#1a1a1a',
+        padding: 10,
+        boxShadow: '0 40px 80px rgba(51,38,27,0.22), 0 8px 24px rgba(51,38,27,0.12)',
+        position: 'relative',
+      }}>
+        {/* Screen */}
+        <div style={{
+          width: '100%',
+          height: '100%',
+          borderRadius: 40,
+          background: C.bg,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '28px 18px 18px',
+        }}>
+          {/* Status bar notch */}
+          <div style={{
+            position: 'absolute',
+            top: 18,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 90,
+            height: 22,
+            background: '#1a1a1a',
+            borderRadius: 999,
+            zIndex: 10,
+          }} />
 
-        {/* Main content */}
-        <main className="flex-1 px-4 pb-28 overflow-y-auto">
+          {/* User row */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, marginTop: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+              <div style={{
+                width: 28, height: 28, borderRadius: 999,
+                background: C.primaryTint,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 10, fontWeight: 700, color: C.primary,
+              }}>AK</div>
+              <span style={{ fontSize: 11, color: C.textSecondary, fontWeight: 500 }}>Aaron</span>
+            </div>
+            <span style={{ fontSize: 10, color: C.textLabel }}>Sign out</span>
+          </div>
+
+          {/* Wordmark */}
+          <div style={{ textAlign: 'center', marginBottom: 8 }}>
+            <span style={{ fontSize: 17, fontWeight: 800, letterSpacing: -0.4 }}>
+              <span style={{ color: C.textPrimary }}>Pipeline</span>
+              <span style={{ color: C.primary }}>Remit</span>
+            </span>
+          </div>
+
+          {/* Badge */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+            <div style={{
+              background: C.primaryTint,
+              border: `1px solid ${C.divider}`,
+              borderRadius: 999,
+              padding: '4px 10px',
+              display: 'flex', alignItems: 'center', gap: 5,
+            }}>
+              <div style={{ width: 5, height: 5, borderRadius: 999, background: C.success }} />
+              <span style={{ fontSize: 9, fontWeight: 700, color: C.primary }}>UK → Ghana · No fees, ever</span>
+            </div>
+          </div>
 
           {/* Hero */}
-          <div className="mt-2 mb-6">
-            <h1
-              className="text-[32px] font-semibold leading-tight"
-              style={{ fontFamily: fraunces }}
-            >
-              Send Money Home.<br />
-              <span className="text-[#f0b429]">Instantly.</span>
-            </h1>
-            <p className="text-[#8a9e8c] text-sm mt-2 leading-snug">
-              GBP to GHS. Straight to mobile money.<br />Under 30 minutes.
-            </p>
+          <div style={{ textAlign: 'center', marginBottom: 12 }}>
+            <div style={{ fontSize: 22, fontWeight: 900, color: C.textPrimary, letterSpacing: -0.8, lineHeight: 1.1 }}>Send money home.</div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: C.primary, fontStyle: 'italic', letterSpacing: -0.8, lineHeight: 1.1 }}>With ease.</div>
           </div>
 
-          {/* Rate Calculator */}
-          <div className="bg-[#1a2a1c] border border-[#2a3d2c] rounded-2xl p-4 mb-6">
-
-            {/* You Send */}
-            <div className="mb-3">
-              <label className="text-[#8a9e8c] text-[11px] font-medium uppercase tracking-wider">
-                You Send
-              </label>
-              <div className="flex items-center bg-[#1f3222] border border-[#2a3d2c] rounded-[10px] px-3 py-3 mt-2 focus-within:border-[#f0b429] transition-colors">
-                <span
-                  className="text-[#f0ede6] text-2xl font-semibold mr-1 leading-none"
-                  style={{ fontFamily: fraunces }}
-                >
-                  £
-                </span>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={gbpInput}
-                  onChange={(e) => setGbpInput(e.target.value)}
-                  className="flex-1 bg-transparent text-[#f0ede6] text-2xl font-semibold outline-none w-0 min-w-0"
-                  style={{ fontFamily: fraunces }}
-                  aria-label="GBP amount"
-                />
-                <span className="text-[#8a9e8c] text-sm font-medium ml-2 shrink-0">GBP</span>
-              </div>
+          {/* Calculator card */}
+          <div style={{
+            background: C.card,
+            borderRadius: 20,
+            border: `1px solid ${C.divider}`,
+            padding: '14px 14px 10px',
+          }}>
+            <div style={{ fontSize: 8, fontWeight: 700, color: C.textLabel, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>You send</div>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: C.textSecondary, marginRight: 2 }}>£</span>
+              <span style={{ fontSize: 28, fontWeight: 800, color: C.textPrimary, letterSpacing: -1 }}>100</span>
             </div>
-
-            {/* Exchange rate divider */}
-            <div className="flex items-center gap-2 my-3">
-              <div className="flex-1 h-px bg-[#2a3d2c]" />
-              <div className="flex items-center gap-1 text-xs text-[#8a9e8c]">
-                <i className="ti ti-arrows-down-up text-[#f0b429] text-xs" />
-                {rateLoading ? (
-                  <div className="h-3 w-36 bg-[#2a3d2c] rounded animate-pulse" />
-                ) : (
-                  <span>
-                    1 GBP ={' '}
-                    <span className="text-[#f0b429] font-medium">
-                      {currentRate.toFixed(3)} GHS
-                    </span>
-                    {isFallback && (
-                      <span className="text-[#8a9e8c] ml-1">(est.)</span>
-                    )}
-                  </span>
-                )}
-              </div>
-              <div className="flex-1 h-px bg-[#2a3d2c]" />
+            <div style={{ height: 1, background: C.divider, marginBottom: 10 }} />
+            <div style={{ fontSize: 8, fontWeight: 700, color: C.textLabel, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>They receive</div>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 16, fontWeight: 700, color: C.primary, marginRight: 2 }}>₵</span>
+              <span style={{ fontSize: 28, fontWeight: 800, color: C.primary, letterSpacing: -1 }}>1,684.20</span>
             </div>
-
-            {/* Recipient Gets */}
-            <div className="mb-4">
-              <label className="text-[#8a9e8c] text-[11px] font-medium uppercase tracking-wider">
-                Recipient Gets
-              </label>
-              <div className="flex items-center bg-[#1f3222] border border-[#2a3d2c] rounded-[10px] px-3 py-3 mt-2">
-                <span
-                  className="text-[#f0ede6] text-2xl font-semibold mr-1 leading-none"
-                  style={{ fontFamily: fraunces }}
-                >
-                  ₵
-                </span>
-                {rateLoading ? (
-                  <div className="flex-1 h-7 bg-[#2a3d2c] rounded animate-pulse mx-1" />
-                ) : (
-                  <span
-                    className="flex-1 text-[#f0b429] text-2xl font-semibold"
-                    style={{ fontFamily: fraunces }}
-                  >
-                    {ghsAmount > 0 ? ghsAmount.toFixed(2) : '0.00'}
-                  </span>
-                )}
-                <span className="text-[#8a9e8c] text-sm font-medium ml-2 shrink-0">GHS</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 8, color: C.textLabel }}>Rate: 1 GBP = 16.842 GHS</span>
+              <div style={{
+                background: C.successTint, borderRadius: 999,
+                padding: '2px 7px', display: 'flex', alignItems: 'center', gap: 3,
+              }}>
+                <div style={{ width: 4, height: 4, borderRadius: 999, background: C.success }} />
+                <span style={{ fontSize: 8, fontWeight: 600, color: C.successText }}>Under 30 min</span>
               </div>
-            </div>
-
-            {/* Info rows */}
-            <div className="space-y-2 mb-4 text-sm">
-              <div className="flex justify-between items-center">
-                <span className="text-[#8a9e8c]">Fees</span>
-                <span className="text-[#2ecc71] font-medium">None</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[#8a9e8c]">Delivery</span>
-                <span className="text-[#2ecc71] flex items-center gap-1 text-xs font-medium">
-                  <i className="ti ti-clock text-xs" />
-                  Under 30 minutes
-                </span>
-              </div>
-            </div>
-
-            {/* Continue Button */}
-            <button
-              onClick={handleContinue}
-              disabled={rateLoading}
-              className="w-full bg-[#f0b429] text-[#0f1a14] font-semibold text-[15px] rounded-[10px] py-[14px] hover:bg-[#d99e1e] active:bg-[#d99e1e] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {rateLoading ? 'Getting live rate…' : 'Continue'}
-            </button>
-
-            <p className="text-center text-[#8a9e8c] text-[11px] mt-3">
-              No fees · Live rate updated hourly
-            </p>
-          </div>
-
-          {/* How it Works */}
-          <div className="mb-6">
-            <h2
-              className="text-lg font-semibold mb-4 text-[#f0ede6]"
-              style={{ fontFamily: fraunces }}
-            >
-              How it Works
-            </h2>
-            <div className="space-y-4">
-              {[
-                {
-                  step: '1',
-                  title: 'Enter amount',
-                  desc: 'Type how much GBP you want to send and see the GHS instantly.',
-                },
-                {
-                  step: '2',
-                  title: 'Add recipient',
-                  desc: 'Enter their name and MTN or Telecel mobile money number.',
-                },
-                {
-                  step: '3',
-                  title: 'Pay & done',
-                  desc: 'Pay securely via Open Banking. Money arrives in under 30 minutes.',
-                },
-              ].map(({ step, title, desc }) => (
-                <div key={step} className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#f0b429] flex items-center justify-center shrink-0 mt-0.5">
-                    <span
-                      className="text-[#0f1a14] font-bold text-sm"
-                      style={{ fontFamily: fraunces }}
-                    >
-                      {step}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-[#f0ede6] text-sm">{title}</p>
-                    <p className="text-[#8a9e8c] text-xs mt-0.5 leading-relaxed">{desc}</p>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
 
-          {/* Trust Stats */}
-          <div className="bg-[#1a2a1c] border border-[#2a3d2c] rounded-2xl p-4">
-            <div className="grid grid-cols-3 divide-x divide-[#2a3d2c]">
-              {[
-                { stat: '10K+', label: 'Transfers' },
-                { stat: '3.5K+', label: 'Senders' },
-                { stat: '<30m', label: 'Delivery' },
-              ].map(({ stat, label }) => (
-                <div key={label} className="flex flex-col items-center px-2 py-1">
-                  <span
-                    className="text-[#f0b429] text-xl font-semibold"
-                    style={{ fontFamily: fraunces }}
-                  >
-                    {stat}
-                  </span>
-                  <span className="text-[#8a9e8c] text-xs mt-1">{label}</span>
-                </div>
-              ))}
-            </div>
+          {/* CTA */}
+          <div style={{
+            marginTop: 10,
+            background: C.primary,
+            borderRadius: 999,
+            padding: '10px 0',
+            textAlign: 'center',
+            fontSize: 12,
+            fontWeight: 700,
+            color: '#fff',
+          }}>
+            Send money home →
           </div>
-
-        </main>
-
-        {/* Bottom Nav */}
-        <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] bg-[#1a2a1c] border-t border-[#2a3d2c] flex items-center justify-around px-2 py-3 z-10">
-          {[
-            { icon: 'ti-home', label: 'Home', active: true },
-            { icon: 'ti-send', label: 'Send', active: false },
-            { icon: 'ti-clock-history', label: 'History', active: false },
-            { icon: 'ti-user', label: 'Account', active: false },
-          ].map(({ icon, label, active }) => (
-            <button
-              key={label}
-              className="flex flex-col items-center gap-1 px-4 py-1"
-              aria-label={label}
-            >
-              <i className={`ti ${icon} text-xl ${active ? 'text-[#f0b429]' : 'text-[#8a9e8c]'}`} />
-              <span
-                className={`text-[10px] font-medium ${active ? 'text-[#f0b429]' : 'text-[#8a9e8c]'}`}
-              >
-                {label}
-              </span>
-            </button>
-          ))}
-        </nav>
-
+        </div>
       </div>
+    </div>
+  );
+}
+
+function HowItWorks() {
+  const steps = [
+    { n: '1', title: 'Enter amount', desc: 'Type how much GBP you want to send and see the live GHS amount instantly.' },
+    { n: '2', title: 'Add recipient', desc: 'Their Ghanaian mobile number is all you need — we handle the rest.' },
+    { n: '3', title: 'Money arrives', desc: 'GHS lands in their MTN or Telecel wallet in under 30 minutes.' },
+  ];
+  return (
+    <section style={{ maxWidth: 680, margin: '0 auto', padding: '64px 24px' }}>
+      <h2 style={{ fontSize: 32, fontWeight: 800, color: C.textPrimary, letterSpacing: -0.6, textAlign: 'center', marginBottom: 48 }}>
+        How it works
+      </h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+        {steps.map(s => (
+          <div key={s.n} style={{ display: 'flex', alignItems: 'flex-start', gap: 20 }}>
+            <div style={{
+              width: 48, height: 48, borderRadius: 999, flexShrink: 0,
+              background: C.primaryTint,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 20, fontWeight: 800, color: C.primary,
+              border: `1.5px solid ${C.divider}`,
+            }}>{s.n}</div>
+            <div style={{ paddingTop: 6 }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: C.textPrimary, marginBottom: 6 }}>{s.title}</div>
+              <div style={{ fontSize: 15, color: C.textSecondary, lineHeight: 1.6 }}>{s.desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function TrustBar() {
+  const signals = [
+    { icon: '⚡', label: 'Under 30 minutes' },
+    { icon: '📱', label: 'MTN & Telecel supported' },
+    { icon: '🔒', label: 'Your money is safe' },
+  ];
+  return (
+    <section style={{
+      background: C.primaryTint,
+      borderTop: `1px solid ${C.divider}`,
+      borderBottom: `1px solid ${C.divider}`,
+      padding: '32px 24px',
+    }}>
+      <div style={{
+        maxWidth: 680,
+        margin: '0 auto',
+        display: 'flex',
+        justifyContent: 'center',
+        gap: 48,
+        flexWrap: 'wrap',
+      }}>
+        {signals.map(s => (
+          <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 22 }}>{s.icon}</span>
+            <span style={{ fontSize: 15, fontWeight: 600, color: C.textPrimary }}>{s.label}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer style={{ padding: '48px 24px', textAlign: 'center' }}>
+      <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.4, marginBottom: 10 }}>
+        <span style={{ color: C.textPrimary }}>Pipeline</span>
+        <span style={{ color: C.primary }}>Remit</span>
+      </div>
+      <p style={{ fontSize: 14, color: C.textSecondary, marginBottom: 20 }}>
+        Sending money home shouldn&apos;t be complicated.
+      </p>
+      <p style={{ fontSize: 12, color: C.textLabel }}>
+        © 2026 PipelineRemit. All rights reserved.
+      </p>
+    </footer>
+  );
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+
+export default function LandingPage() {
+  return (
+    <div style={{ background: C.bg, minHeight: '100vh' }}>
+      <Nav />
+
+      {/* Hero */}
+      <section style={{ maxWidth: 1080, margin: '0 auto', padding: '40px 24px 0' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 48, alignItems: 'center' }}>
+
+          {/* Left — copy + form */}
+          <div>
+            <h1 style={{
+              fontSize: 'clamp(40px, 6vw, 64px)',
+              fontWeight: 900,
+              letterSpacing: -2,
+              lineHeight: 1.05,
+              margin: '0 0 20px',
+            }}>
+              <span style={{ color: C.textPrimary }}>Send money home.</span>
+              <br />
+              <span style={{ color: C.primary, fontStyle: 'italic' }}>With ease.</span>
+            </h1>
+            <p style={{
+              fontSize: 18,
+              color: C.textSecondary,
+              lineHeight: 1.65,
+              margin: '0 0 32px',
+              maxWidth: 460,
+            }}>
+              Send GBP from the UK directly to MTN or Telecel mobile money wallets in Ghana. In under 30 minutes.
+            </p>
+            <WaitlistForm />
+            <p style={{ fontSize: 12, color: C.textLabel, marginTop: 12 }}>
+              Join the waitlist — be first to know when we launch.
+            </p>
+          </div>
+
+          {/* Right — phone mockup */}
+          <PhoneMockup />
+        </div>
+      </section>
+
+      <HowItWorks />
+      <TrustBar />
+      <Footer />
     </div>
   );
 }
